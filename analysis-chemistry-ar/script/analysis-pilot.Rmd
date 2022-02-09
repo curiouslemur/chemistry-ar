@@ -1,0 +1,28 @@
+---
+title: "analysis-pilot"
+author: "nr"
+date: "2/9/2022"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+---
+title: "v2w-analysis"
+author: "nr"
+date: "20-jan-2022"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(dplyr) 
+library(RColorBrewer)
+library(readr)
+library(ggridges, boot)
+source(file = "./script/v2w-util.R")
+source(file = "./script/util.R")
+# library(RColorBrewer)
+library(colorspace)
+library(irr)
+library(boot)
+```
