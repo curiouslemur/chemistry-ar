@@ -7,7 +7,7 @@
 ### Analysis
 
 95% bootstrapped Conf. Int. for the answers to the pre and post questionnaires.
-![](https://github.com/curiouslemur/chemistry-ar/blob/master/analysis-chemistry-ar/output/fig/95ci-pre-post-q.png)
+![](https://github.com/curiouslemur/chemistry-ar/blob/master/analysis-R/output/fig/95ci-pre-post-q.png)
 
 ** Remarks ** 
 - on the experiment: 
