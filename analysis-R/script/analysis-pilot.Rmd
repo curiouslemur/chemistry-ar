@@ -31,15 +31,15 @@ library(xlsx)
 ```{r}
 pre <- read.xlsx("./data/pre.xlsx", sheetIndex = 1)
 post <- read.xlsx("./data/post.xlsx", sheetIndex = 1)
-df <- rbind(pre, post)
+df <- rbind(pre, post) %>% drop_na(ID)
 ```
 
 ```{r}
-na.omit(df) %>% 
-  ggplot(aes(x="", y = val, color= type)) +
-    xlab("Probability expressions") + ylab("percentage drawn")+
+df %>% 
+  ggplot(aes(x=type, y = val, color= type)) +
+    xlab("") + ylab("mean answer scale")+
     ggtitle("95% CI for mean")+
-    stat_summary(fun.data = "mean_cl_boot", colour = type, size = 0.5, position = position_nudge(x=0.00, y=0), alpha=1) +
+    stat_summary(fun.data = "mean_cl_boot", size = 0.5, position = position_nudge(x=0.00, y=0), alpha=1) +
   coord_flip() +
     facet_wrap(. ~ description)
 ```
