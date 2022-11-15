@@ -7,19 +7,33 @@ date: "2022-11-15"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = '../') # run getwd()
+# 
+# # setup
+# packages = c("tidyverse", "ggplot2", "dplyr", "RColorBrewer", "irr", 'readr', 'readxl')
+# 
+# package.check <- lapply(
+#   packages,
+#   FUN = function(x) {
+#     if (!require(x, character.only = TRUE)) {
+#       install.packages(x, dependencies = TRUE)
+#       library(x, character.only = TRUE)
+#     }
+#   }
+# )
 
-# setup
-packages = c("tidyverse", "ggplot2", "dplyr", "RColorBrewer", "irr", 'readr', 'readxl')
+#install.packages("irr")
+library("tidyr")
+library("dbplyr")
+library("ggplot2")
+library("dplyr")
+library("RColorBrewer")
+library("irr")
+library('readxl')
+library("boot")
+library("Hmisc")
+#install.packages('stringi')
+#install.packages('Hmisc')
 
-package.check <- lapply(
-  packages,
-  FUN = function(x) {
-    if (!require(x, character.only = TRUE)) {
-      install.packages(x, dependencies = TRUE)
-      library(x, character.only = TRUE)
-    }
-  }
-)
 
 # ggplot theme
 theme_set(theme_light())
@@ -29,7 +43,43 @@ theme_set(theme_light())
 pre <- read_excel("../data/data.xlsx", sheet = "Pre")
 post <- read_excel("../data/data.xlsx", sheet = "Post")
 
+pre <- subset(pre, id!=20)
+post <- subset(post, id!=20)
+
+pre2 <- subset(pre, select = -c(pre_2))
+
+
 ```
+
+```{r}
+pre2 <- gather(pre2, key="question", value="val", 7:13)
+post2 <- gather(post, key="question", value="val", 3:10)
+
+pre_question_ids <- unique(pre2$question)
+
+post_question_ids <- unique(post2$question)
+
+pre2 <- pre2[,c("id", "study_type", "question", "val")]
+post2 <- post2[,c("id", "study_type", "question", "val")]
+
+df <- rbind(pre2, post2)
+
+```
+
+
+
+```{r}
+df %>% 
+  ggplot(aes(x=study_type, y = val, color= study_type)) +
+    xlab("") + ylab("mean answer scale")+
+    ggtitle("95% CI for mean")+
+    stat_summary(fun.data = "mean_cl_boot", size = 0.5, position = position_nudge(x=0.00, y=0), alpha=1) +
+  coord_flip() +
+    facet_wrap(.~question)
+```
+
+
+
 
 
 
