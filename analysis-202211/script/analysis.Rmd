@@ -1,0 +1,37 @@
+---
+title: "analysis"
+output: html_document
+date: "2022-11-15"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = '../') # run getwd()
+
+# setup
+packages = c("tidyverse", "ggplot2", "dplyr", "RColorBrewer", "car", "lme4", "stringr", "ggpubr", "PMCMRplus", "irr", 'readr')
+
+package.check <- lapply(
+  packages,
+  FUN = function(x) {
+    if (!require(x, character.only = TRUE)) {
+      install.packages(x, dependencies = TRUE)
+      library(x, character.only = TRUE)
+    }
+  }
+)
+
+# ggplot theme
+theme_set(theme_light())
+```
+library(readr)
+library(ggridges, boot)
+source(file = "./script/v2w-util.R")
+source(file = "./script/util.R")
+# library(RColorBrewer)
+library(colorspace)
+library(irr)
+library(boot)
+library(xlsx)
+
+
