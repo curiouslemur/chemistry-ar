@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = '../') # run getwd()
 
 # setup
-packages = c("tidyverse", "ggplot2", "dplyr", "RColorBrewer", "car", "lme4", "stringr", "ggpubr", "PMCMRplus", "irr", 'readr')
+packages = c("tidyverse", "ggplot2", "dplyr", "RColorBrewer", "irr", 'readr', 'readxl')
 
 package.check <- lapply(
   packages,
@@ -24,5 +24,12 @@ package.check <- lapply(
 # ggplot theme
 theme_set(theme_light())
 ```
+
+```{r}
+pre <- read_excel("../data/data.xlsx", sheet = "Pre")
+post <- read_excel("../data/data.xlsx", sheet = "Post")
+
+```
+
 
 
