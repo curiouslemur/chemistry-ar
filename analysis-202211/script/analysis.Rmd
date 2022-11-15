@@ -24,14 +24,5 @@ package.check <- lapply(
 # ggplot theme
 theme_set(theme_light())
 ```
-library(readr)
-library(ggridges, boot)
-source(file = "./script/v2w-util.R")
-source(file = "./script/util.R")
-# library(RColorBrewer)
-library(colorspace)
-library(irr)
-library(boot)
-library(xlsx)
 
 
