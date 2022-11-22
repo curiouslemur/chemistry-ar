@@ -33,7 +33,8 @@ library("boot")
 library("Hmisc")
 #install.packages('stringi')
 #install.packages('Hmisc')
-
+library(boot)
+library(effsize)
 
 # ggplot theme
 theme_set(theme_light())
@@ -47,8 +48,6 @@ pre <- subset(pre, id!=20)
 post <- subset(post, id!=20)
 
 pre2 <- subset(pre, select = -c(pre_2))
-
-
 ```
 
 ```{r}
@@ -79,33 +78,30 @@ df %>%
 ```
 
 ```{r}
-# t.test(df$groundtruth2, conf.level = 0.95)
-# t.test(filter(df, question == 'pre_1', ques == 'pre_1')$val, conf.level = 0.95)
-
-library(boot)
-library(effsize)
-
-compute_ci = function (qname, c1, c2) {
-  #result = data.frame(qname=qname, t=c(), W=c(), d=c())
-#  filter(df, question == )
+compute_stats = function (df, qname) {
+  valc = filter(df, question == qname, study_type == 'control')$val
+  valh = filter(df, question == qname, study_type == 'hololens')$val
+  
   t = t.test(
-    pre_1_c,
-    pre_1_h,
+    valc,
+    valh,
     conf.level=.95
   )
   
-  c = cohen.d(pre_1_c, pre_1_h, paired=FALSE)
+  d = cohen.d(valc, valh, paired=FALSE)
 
-  W = wilcox.test(x=pre_1_c, y=pre_1_h, na.rm=TRUE, paired=FALSE, exact=FALSE, conf.int=TRUE)
+  W = wilcox.test(x=valc, y=valh, na.rm=TRUE, paired=FALSE, exact=FALSE, conf.int=TRUE)
 
-  result = data.frame(qname=c(qname), t=c(t$p.value), W=c(W[1]$statistic), d=c(c[3]$estimate))
-  return(result)
+  stats = data.frame(qname=c(qname), p=c(t$p.value), W=c(W[1]$statistic), d=c(d[3]$estimate))
+  
+  return(stats)
 }
 
-pre_1_c <- filter(df, question == 'post_5', study_type == 'control')$val
-pre_1_h <- filter(df, question == 'post_5', study_type == 'hololens')$val
-
-compute_ci("PRE1", pre_1_c, pre_1_h)
+qList <- unique(df$question)
+allStats <- data.frame()
+for (q in qList) {
+  allStats <- rbind(allStats, compute_stats(df, q))
+}
 
 ```
 
