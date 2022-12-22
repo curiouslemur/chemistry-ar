@@ -41,30 +41,32 @@ theme_set(theme_light())
 ```
 
 ```{r}
-pre <- read_excel("../data/data.xlsx", sheet = "Pre")
-post <- read_excel("../data/data.xlsx", sheet = "Post")
+# loading data for pre and post questionnaires
+pre <- read_excel("data/data.xlsx", sheet = "Pre")
+post <- read_excel("data/data.xlsx", sheet = "Post")
 
+# removind entries from participant # 20 (didn't participate because minor)
 pre <- subset(pre, id!=20)
 post <- subset(post, id!=20)
 
-pre2 <- subset(pre, select = -c(pre_2))
+pre2 <- subset(pre, select = -c(pre_2)) # pre questionnaires without the bolumn for pre_2 question
 ```
 
 ```{r}
+# building the dataset 
 pre2 <- gather(pre2, key="question", value="val", 7:13)
 post2 <- gather(post, key="question", value="val", 3:10)
 
 pre_question_ids <- unique(pre2$question)
-
 post_question_ids <- unique(post2$question)
 
+# selecting only the id, study_type, qeustion and val columns
 pre2 <- pre2[,c("id", "study_type", "question", "val")]
 post2 <- post2[,c("id", "study_type", "question", "val")]
 
+# building the database with answers
 df <- rbind(pre2, post2)
-
 ```
-
 
 
 ```{r}
@@ -73,9 +75,15 @@ df %>%
     xlab("") + ylab("mean answer scale")+
     ggtitle("95% CI for mean")+
     stat_summary(fun.data = "mean_cl_boot", size = 0.5, position = position_nudge(x=0.00, y=0), alpha=1) +
+    scale_color_manual(values = c('#fc8d62', '#8da0cb'))+
   coord_flip() +
     facet_wrap(.~question)
 ```
+
+Computing statistical measures: 
+- confidence intervals
+- cohen's d: effect size
+- wilcoxon test
 
 ```{r}
 compute_stats = function (df, qname) {
@@ -89,7 +97,6 @@ compute_stats = function (df, qname) {
   )
   
   d = cohen.d(valc, valh, paired=FALSE)
-
   W = wilcox.test(x=valc, y=valh, na.rm=TRUE, paired=FALSE, exact=FALSE, conf.int=TRUE)
 
   stats = data.frame(qname=c(qname), p=c(t$p.value), W=c(W[1]$statistic), d=c(d[3]$estimate))
