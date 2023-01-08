@@ -42,8 +42,8 @@ theme_set(theme_light())
 
 ```{r}
 # loading data for pre and post questionnaires
-pre <- read_excel("data/data.xlsx", sheet = "Pre")
-post <- read_excel("data/data.xlsx", sheet = "Post")
+pre <- read_excel("../data/data.xlsx", sheet = "Pre")
+post <- read_excel("../data/data.xlsx", sheet = "Post")
 
 # removind entries from participant # 20 (didn't participate because minor)
 pre <- subset(pre, id!=20)
@@ -113,5 +113,40 @@ for (q in qList) {
 ```
 
 
+```{r}
+df %>% filter(question == "post_2" | question == "post_5") %>% 
+  ggplot(aes(x=question, y = val, color= study_type)) +
+  xlab("") + ylab("mean answer scale")+
+  ylim(1,5) +
+  ggtitle("95% CI for mean")+
+  stat_summary(fun.data = "mean_cl_boot", size = 0.5, position = position_dodge(0.2), alpha=1) +
+  scale_color_manual(values = c('#fc8d62', '#8da0cb'))
+
+```
+
+```{r}
+fig_ci <- function(qqq) {
+  # p <- df %>% filter(question == "post_3" | question == "post_4") %>% 
+  p <- df %>% filter(question %in% qqq) %>%
+    ggplot(aes(x=question, y = val, color= study_type)) +
+    xlab("") + ylab("mean answer scale")+
+    ylim(1,5) +
+    ggtitle("95% CI for mean")+
+    stat_summary(fun.data = "mean_cl_boot", size = 0.5, position = position_dodge(0.2), alpha=1) +
+    scale_color_manual(values = c('#fc8d62', '#8da0cb'))
+
+  return (p)
+}
+
+
+```
+
+
+```{r}
+fig_ci(c('post_1'))
+fig_ci(c('post_2', 'post_5'))
+fig_ci(c('post_3', 'post_4'))
+fig_ci(c('post_6', 'post_7'))
+```
 
 
