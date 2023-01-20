@@ -80,26 +80,48 @@ df %>%
     facet_wrap(.~question)
 ```
 
-Computing statistical measures: 
-- confidence intervals
+## Computing statistical measures: 
+- bootstrapped confidence intervals
 - cohen's d: effect size
-- wilcoxon test
+- wilcoxon test / p values
 
 ```{r}
+mean.fun <- function(D, d) {
+  return(mean(D[d]))
+}
 compute_stats = function (df, qname) {
   valc = filter(df, question == qname, study_type == 'control')$val
   valh = filter(df, question == qname, study_type == 'hololens')$val
   
-  t = t.test(
-    valc,
-    valh,
-    conf.level=.95
-  )
+  # t = t.test(
+  #   valc,
+  #   valh,
+  #   conf.level=.95
+  # )
   
-  d = cohen.d(valc, valh, paired=FALSE)
-  W = wilcox.test(x=valc, y=valh, na.rm=TRUE, paired=FALSE, exact=FALSE, conf.int=TRUE)
+  d = cohen.d(valh, valc, paired=FALSE)
+  W = wilcox.test(x=valh, y=valc, na.rm=TRUE, paired=FALSE, exact=FALSE, conf.int=TRUE)
 
-  stats = data.frame(qname=c(qname), p=c(t$p.value), W=c(W[1]$statistic), d=c(d[3]$estimate))
+  ci_c <- boot.ci(
+    boot(data = valc, statistic = mean.fun, R = 1000, sim = "ordinary")
+  )
+  ci_h <- boot.ci(
+    boot(data = valh, statistic = mean.fun, R = 1000, sim = "ordinary")
+  )
+ 
+  # print(ci_c)
+  # print(ci_h)
+  
+  stats = data.frame(qname=c(qname), p=c(W$p.value), W=c(W[1]$statistic), d=c(d[3]$estimate),
+                     d_low = c(d$conf.int[1]),
+                     d_high = c(d$conf.int[2]),
+                     mean_c=c(round(mean(valc),2)),
+                     ci_c_low=c(round(ci_c$bca[, 4], 2)), 
+                     ci_c_high=c(round(ci_c$bca[, 5], 2)),
+                     mean_h=c(round(mean(valh),2)),
+                     ci_h_low=c(round(ci_h$bca[, 4], 2)), 
+                     ci_h_high=c(round(ci_h$bca[, 5], 2))
+                   )
   
   return(stats)
 }
@@ -117,7 +139,7 @@ for (q in qList) {
 df %>% filter(question == "post_2" | question == "post_5") %>% 
   ggplot(aes(x=question, y = val, color= study_type)) +
   xlab("") + ylab("mean answer scale")+
-  ylim(1,5) +
+  ylim(1,6) +
   ggtitle("95% CI for mean")+
   stat_summary(fun.data = "mean_cl_boot", size = 0.5, position = position_dodge(0.2), alpha=1) +
   scale_color_manual(values = c('#fc8d62', '#8da0cb')) +
@@ -130,59 +152,108 @@ df %>% filter(question == "post_2" | question == "post_5") %>%
 fig_ci <- function(questions) {
   diffs = ""
 
-  for (qname in questions) {
-    valc = filter(df, question == qname, study_type == 'control')$val
-    valh = filter(df, question == qname, study_type == 'hololens')$val
-    t = t.test(
-      valh,
-      valc,
-      conf.level=.95
-    )
+  for (q_name in questions) {
+    dd <- filter(allStats, qname==q_name)
+    print("---")
+    W = dd[1,"W"]
+    p = dd[1,"p"]
+    d = dd[1, "d"]
+    d_low = dd[1, "d_low"]
+    d_high = dd[1, "d_high"]
+    ci_c_low = dd[1, "ci_c_low"]
+    ci_c_high = dd[1, "ci_c_high"]
+    ci_h_low = dd[1, "ci_h_low"]
+    ci_h_high = dd[1, "ci_h_high"]
+    mean_c = dd[1, "mean_c"]
+    mean_h = dd[1, "mean_h"]
     
-    d = cohen.d(valh, valc, paired=FALSE)
-    W = wilcox.test(x=valh, y=valc, na.rm=TRUE, paired=FALSE, exact=FALSE, conf.int=TRUE)
-
     diffs = paste(diffs, 
-              qname,
+              q_name,
               ": ",
-              "p = ", 
-              signif(t$p.value, digits = 4), 
-              ", W = ", 
-              signif(W[1]$statistic, digits = 4), 
-              ", d = ", 
-              signif(d[3]$estimate, digits = 4), 
-              "\n",
+              "W = ",
+              signif(W, digits = 4),
+              ", p = ",
+              signif(p, digits = 4),
+              ", d = ",
+              signif(d, digits = 4),
+              "~[",
+              signif(d_low, digits = 4),
+              ",",
+              signif(d_high, digits = 4),
+              "]\n",
               sep = "")
+    
+    # valc = filter(df, question == qname, study_type == 'control')$val
+    # valh = filter(df, question == qname, study_type == 'hololens')$val
+    # 
+    # 
+    # 
+    # 
+    # # t = t.test(
+    # #   valh,
+    # #   valc,
+    # #   conf.level=.95
+    # # )
+    # # 
+    # d = cohen.d(valh, valc, paired=FALSE)
+    # W = wilcox.test(x=valh, y=valc, na.rm=TRUE, paired=FALSE, exact=FALSE, conf.int=TRUE)
+    # print(d)
+    # diffs = paste(diffs, 
+    #           qname,
+    #           ": ",
+    #           ", W = ", 
+    #           signif(W[1]$statistic, digits = 4), 
+    #           ", p = ", 
+    #           signif(W$p.value, digits = 4), 
+    #           ", d = ", 
+    #           signif(d$estimate, digits = 4), 
+    #           "~[", 
+    #           signif(d$conf.int[1], digits = 4), 
+    #           ",", 
+    #           signif(d$conf.int[2], digits = 4), 
+    #           "]\n",
+    #           sep = "")
   }
 
-  
+  labb <- function(v) {
+    print(v)
+    return(v)
+  }
   p <- df %>% filter(question %in% questions) %>%
     ggplot(aes(x=question, y = val, color= study_type)) +
     xlab("") + ylab("")+
-    ylim(1,5) +
+    ylim(1,6) +
     ggtitle("", subtitle = diffs) +
-    stat_summary(fun.data = "mean_cl_boot", size = 0.5, position = position_dodge(0.2), alpha=1) +
+    stat_summary(fun.data = "mean_cl_boot", size = 0.5, position = position_dodge(0.8), alpha=1 ) +
+    # stat_summary(size = 5, position = position_dodge(1), alpha=1, geom = "text", aes(label=questions)) +
+
     scale_color_manual(values = c('#fc8d62', '#8da0cb')) +
+    # scale_x_reverse() + 
     coord_flip()
   return (p)
 }
 
 
-```
-
-
-```{r}
 fig_ci(c('post_1')) +
-  ggtitle("Willingness to integrate AR")
+  ggtitle("Willingness to Integrate AR")
+ggsave("../output/fig/post-1.pdf", width = 5, height = 2, units = "in")
 
 fig_ci(c('post_2', 'post_5')) +
-  ggtitle("Learning experience")
+  ggtitle("Learning Experience")
+ggsave("../output/fig/post-2-5.pdf", width = 5, height = 2, units = "in")
 
 fig_ci(c('post_3', 'post_4')) +
-  ggtitle("Ability to recall procedures and parts")
+  ggtitle("Ability to Recall Procedures and Parts")
+ggsave("../output/fig/post-3-4.pdf", width = 5, height = 2, units = "in")
 
 fig_ci(c('post_6', 'post_7')) +
-  ggtitle("Building experience")
+  ggtitle("Building Experience")
+ggsave("../output/fig/post-6-7.pdf", width = 5, height = 2, units = "in")
+
+fig_ci(c('post_8')) +
+  ggtitle("Overall Experience")
+ggsave("../output/fig/post-8.pdf", width = 5, height = 2, units = "in")
+
 ```
 
 
