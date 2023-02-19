@@ -239,7 +239,10 @@ fig_ci <- function(questions) {
     stat_summary(fun.data = "mean_cl_boot", size = 0.5, position = position_dodge(0.8), alpha=1 ) +
     # stat_summary(size = 5, position = position_dodge(1), alpha=1, geom = "text", aes(label=questions)) +
 
-    scale_color_manual(values = c('#fc8d62', '#8da0cb')) +
+    scale_color_manual(values = c('#fc8d62', '#8da0cb'), labels=c('Non-AR', 'AR')) +
+    # scale_color_discrete(labels=c('Control', 'AR')) +
+    # scale_fill_discrete(name = "New Legend Title") +
+    guides(color=guide_legend(title="Condition", reverse = TRUE)) +
     # scale_x_reverse() + 
     coord_flip()
   return (p)
