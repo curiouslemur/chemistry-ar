@@ -251,23 +251,23 @@ fig_ci <- function(questions) {
 ```{r}
 fig_ci(c('post_1')) 
   # ggtitle("Willingness to Integrate AR")
-ggsave("../output/fig/post-1.png", width = 5, height = 2, units = "in")
+ggsave("../output/fig/post-1.svg", width = 5, height = 2, units = "in")
 
 fig_ci(c('post_5', 'post_2')) 
   # ggtitle("Learning Experience")
-ggsave("../output/fig/post-2-5.png", width = 5, height = 2, units = "in")
+ggsave("../output/fig/post-2-5.svg", width = 5, height = 2, units = "in")
 
 fig_ci(c('post_4', 'post_3'))
   # ggtitle("Ability to Recall Procedures and Parts")
-ggsave("../output/fig/post-3-4.png", width = 5, height = 2, units = "in")
+ggsave("../output/fig/post-3-4.svg", width = 5, height = 2, units = "in")
 
 fig_ci(c('post_7', 'post_6')) 
   # ggtitle("Building Experience")
-ggsave("../output/fig/post-6-7.png", width = 5, height = 2, units = "in")
+ggsave("../output/fig/post-6-7.svg", width = 5, height = 2, units = "in")
 
 fig_ci(c('post_8'))
   # ggtitle("Overall Experience")
-ggsave("../output/fig/post-8.png", width = 5, height = 2, units = "in")
+ggsave("../output/fig/post-8.svg", width = 5, height = 2, units = "in")
 
 ```
 
